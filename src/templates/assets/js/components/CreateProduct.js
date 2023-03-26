@@ -1,10 +1,11 @@
 import React, {useState} from 'react';
 import TagsInput from 'react-tagsinput';
 import 'react-tagsinput/react-tagsinput.css';
-import Dropzone from 'react-dropzone'
-
+import Dropzone from 'react-dropzone';
+import axios from 'axios';
 
 const CreateProduct = (props) => {
+
 
     const [productVariantPrices, setProductVariantPrices] = useState([])
 
@@ -14,6 +15,9 @@ const CreateProduct = (props) => {
             tags: []
         }
     ])
+    const [productName, setProductName] = useState("");
+    const [productSKU, setProductSKU] = useState("");
+    const [productDescription, setProductDescription] = useState("");
     console.log(typeof props.variants)
     // handle click event of the Add button
     const handleAddClick = () => {
@@ -75,9 +79,37 @@ const CreateProduct = (props) => {
     }
 
     // Save product
-    let saveProduct = (event) => {
-        event.preventDefault();
-        // TODO : write your code here to save the product
+    let saveProduct = async (event) => {
+        try {
+            const pName = productName;
+            const pSKU = productSKU;
+            const pDescription = productDescription;
+        
+            // Get the selected variant
+            const pVariants = productVariants;
+            const pVariantPrices = productVariantPrices;
+            // Make the POST request
+            
+            // await axios.post("/product/create/", { key: 'value' })
+            const response = await axios.post("/product/create/", {
+                pName: productName,
+                pSKU: productSKU,
+                pDescription: productDescription,
+                pVariant: pVariants,
+                pVariantPrices: pVariantPrices
+            });
+            console.log(response)
+      
+          // Update the state with the new data
+          setProductVariantPrices(response.data.productVariantPrices);
+      
+          // Show success message
+          alert("Product saved successfully!");
+      
+        } catch (error) {
+          console.log(error);
+          alert("Error occurred while saving the product.");
+        }
     }
 
 
@@ -90,15 +122,15 @@ const CreateProduct = (props) => {
                             <div className="card-body">
                                 <div className="form-group">
                                     <label htmlFor="">Product Name</label>
-                                    <input type="text" placeholder="Product Name" className="form-control"/>
+                                    <input type="text" name='productName' placeholder="Product Name" className="form-control" value={productName} onChange={(event) => setProductName(event.target.value)}/>
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="">Product SKU</label>
-                                    <input type="text" placeholder="Product Name" className="form-control"/>
+                                    <input type="text" name='productSKU' placeholder="Product Name" className="form-control" value={productSKU} onChange={(event) => setProductSKU(event.target.value)}/>
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="">Description</label>
-                                    <textarea id="" cols="30" rows="4" className="form-control"></textarea>
+                                    <textarea id="" name='productDescription' cols="30" rows="4" className="form-control" value={productDescription} onChange={(event) => setProductDescription(event.target.value)}></textarea>
                                 </div>
                             </div>
                         </div>

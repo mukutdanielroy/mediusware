@@ -8,6 +8,10 @@ from django.core.paginator import Paginator
 from django.views.generic import ListView
 from django.core.paginator import Paginator
 from django.db.models import Prefetch, Q
+from django.urls import reverse_lazy
+from django.shortcuts import redirect
+import json
+
 
 class CreateProductView(generic.TemplateView):
     template_name = 'products/create.html'
@@ -18,6 +22,50 @@ class CreateProductView(generic.TemplateView):
         context['product'] = True
         context['variants'] = list(variants.all())
         return context
+    
+    def post(self, request, *args, **kwargs):
+    # Get the product data from the request body
+        print(request.body)
+        data = json.loads(request.body)
+        title = data['pName']
+        sku = data['pSKU']
+        description = data['pDescription']
+        product_variants = data['pVariant']
+        product_variant_prices = data['pVariantPrices']
+
+        variant_id = product_variants[0]['option']
+        variant = Variant.objects.get(id=variant_id)
+
+        new_product = Product(
+            title=title,
+            sku=sku,
+            description=description
+        )
+        new_product.save()
+
+        # Save product variants
+        for variant in product_variants:
+            option = variant['option']
+            tags = variant['tags']
+            new_product_variant = ProductVariant(
+                product=new_product,
+                option=option
+            )
+        new_product_variant.save()
+
+        # Save product variant prices
+        for price in product_variant_prices:
+            variant_id = price['variant']
+            if variant_id == option:
+                amount = price['amount']
+                new_product_variant_price = ProductVariantPrice(
+                    product_variant=new_product_variant,
+                    variant=Variant.objects.get(id=variant_id),
+                    amount=amount
+                )
+            new_product_variant_price.save()
+
+        return redirect(self.success_url)
 
 
 
