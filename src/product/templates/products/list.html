@@ -18,9 +18,19 @@
                 <div class="col-md-2">
                     <select name="variant" id="" class="form-control">
                         <option selected disabled>--Select A Variant--</option>
-
+                        {% for variant in variants %}
+                            <optgroup label="{{ variant.title }}">
+                            {% for product_variant in variant.productvariant_set.all %}
+                                <option value="{{ product_variant.pk }}">
+                                    {{ product_variant.variant_title }} - {{ product_variant.product.title }}
+                                </option>
+                            {% endfor %}
+                            </optgroup>
+                        {% endfor %}
                     </select>
                 </div>
+                
+                
 
                 <div class="col-md-3">
                     <div class="input-group">
@@ -56,7 +66,7 @@
 
                     <tbody>
                     {% if products  %}
-                        {% for product in products %}
+                        {% for product in page_obj %}
                             <tr>
                                 <td>{{ product.id }}</td>
                                 <td>{{ product.title }} <br> {{ product.created_at }}</td>
@@ -68,7 +78,7 @@
                                         </dt>
                                         <dd class="col-sm-9">
                                             <dl class="row mb-0">
-                                                <dd class="col-sm-4 pb-0">Price : 200.0</dd>
+                                                <dd class="col-sm-4 pb-0">Price :{{product.productvariant__productvariantprice}} 200.0</dd>
                                                 <dd class="col-sm-8 pb-0">InStock : 50.</dd>
                                             </dl>
                                         </dd>
